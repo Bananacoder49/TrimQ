@@ -1,0 +1,10 @@
+{
+  "name": "trimq",
+  "version": "0.1.0",
+  "description": "TrimQ: a progressive web app for appointment scheduling and real-time hybrid queue management at Madrid's Barbershop.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "npx serve public"
+  }
+}
