@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TrimQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF;--ink:#111111;--block:#0A0A0A;--on-block:#FFFFFF;--gold:#F2C94C;--grey:#8A8A8A;--line:#D9D9D9;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0A0A0A;--ink:#F2F2F2;--block:#1E1E1E;--on-block:#FFFFFF;--gold:#F2C94C;--grey:#9A9A9A;--line:#333333;}}
+:root[data-theme="dark"]{
+  --bg:#0A0A0A;--ink:#F2F2F2;--block:#1E1E1E;--on-block:#FFFFFF;--gold:#F2C94C;--grey:#9A9A9A;--line:#333333;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.5 "Poppins",system-ui,-apple-system,"Segoe UI",sans-serif}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.app{max-width:440px;margin:0 auto;padding:1rem 1rem 2rem;display:grid;gap:1.1rem}
+.block{background:var(--block);color:var(--on-block);border-radius:20px}
+.top{height:150px;position:relative;display:grid;place-items:center}
+.top .logo{font-size:1.6rem;font-weight:500;letter-spacing:.02em}
+.top .login{position:absolute;top:.9rem;right:1.2rem;color:var(--on-block);font-weight:500;text-decoration:none}
+.top .login:hover{text-decoration:underline}
+.status{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;padding:.9rem .8rem;align-items:center}
+.stat{display:flex;align-items:center;gap:.5rem;font-size:.72rem;line-height:1.2}
+.stat .dot{flex:none;width:34px;height:34px;border-radius:50%;background:var(--grey)}
+.stat b{display:block;font-weight:500;font-size:.95rem}
+.stat.mid span{color:var(--gold)}
+.action{display:flex;align-items:center;gap:1rem;width:calc(100% - 2.4rem);margin:0 auto;padding:.9rem 1rem;border:0;cursor:pointer;font:500 1.15rem "Poppins",sans-serif;text-align:left}
+.action:hover{filter:brightness(1.25)}
+.action .ico{flex:none;width:52px;height:52px;border-radius:50%;background:var(--grey);display:grid;place-items:center;color:#111}
+.action span.lbl{flex:1;text-align:center}
+.action[disabled]{opacity:.7;cursor:default}
+.rec-head{display:flex;justify-content:space-between;align-items:center;margin-top:.8rem;position:relative}
+.rec-head h2{margin:0;font-size:1rem;font-weight:500;line-height:1.3}
+.burger{background:none;border:0;color:var(--ink);cursor:pointer;padding:.3rem}
+.menu{position:absolute;right:0;top:100%;z-index:2;background:var(--block);color:var(--on-block);border-radius:14px;padding:.5rem;min-width:170px;display:none}
+.menu.open{display:block}
+.menu a{display:block;padding:.5rem .8rem;color:inherit;text-decoration:none;border-radius:8px}
+.menu a:hover{background:#333}
+.cuts{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;text-align:center;margin:.6rem 0 .4rem}
+.img{aspect-ratio:1;border-radius:12px;background:var(--block);color:var(--on-block);display:grid;place-items:center;font-weight:600;font-size:.85rem}
+.cut .name{margin-top:.5rem;background:var(--block);color:var(--on-block);border-radius:8px;padding:.15rem;font-size:.72rem;font-weight:500}
+.cut .price{font-size:.8rem;margin-top:.15rem}
+.foot{padding:1rem;display:grid;gap:.8rem;margin-top:.6rem}
+.foot a{display:flex;align-items:center;gap:.9rem;color:var(--on-block);text-decoration:none;font-weight:500}
+.foot .bi{flex:none;width:36px;height:36px;border-radius:8px;background:var(--grey);display:grid;place-items:center;color:#111}
+.toast{min-height:1.4rem;text-align:center;font-size:.9rem;color:var(--grey)}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="block top">
+    <a class="login" href="#login">LOGIN</a>
+    <div class="logo">LOGO HERE</div>
+  </header>
+
+  <section class="block status" aria-label="Queue status" aria-live="polite">
+    <div class="stat"><span class="dot" aria-hidden="true"></span><div>Now Serving<b id="serving">0</b></div></div>
+    <div class="stat mid"><span class="dot" aria-hidden="true" style="background:var(--grey)"></span><div><span>Queue ID</span><b id="qid" style="color:var(--on-block)">1</b></div></div>
+    <div class="stat"><span class="dot" aria-hidden="true"></span><div>Estimated Time<b id="eta">00:00</b></div></div>
+  </section>
+
+  <button class="block action" id="join" type="button">
+    <span class="ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-4 3-6 6.5-6s6 2 6.5 6"/><path d="M17 5v6M14 8h6"/></svg></span>
+    <span class="lbl">JOIN QUEUE</span>
+  </button>
+
+  <a class="block action" id="book" href="#book" style="text-decoration:none">
+    <span class="ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span>
+    <span class="lbl">BOOK APPOINTMENT</span>
+  </a>
+  <div class="toast" id="toast" role="status"></div>
+
+  <section aria-labelledby="rec">
+    <div class="rec-head">
+      <h2 id="rec">Recommended<br>Haircuts</h2>
+      <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav class="menu" id="menu" aria-label="Menu">
+        <a href="#login">Login</a><a href="#book">Book appointment</a><a href="#contact">Contact</a>
+      </nav>
+    </div>
+    <div class="cuts">
+      <div class="cut"><div class="img">IMAGE</div><div class="name">HAIRCUT 1</div><div class="price">$ 10</div></div>
+      <div class="cut"><div class="img">IMAGE</div><div class="name">HAIRCUT 2</div><div class="price">$ 15</div></div>
+      <div class="cut"><div class="img">IMAGE</div><div class="name">HAIRCUT 3</div><div class="price">$ 25</div></div>
+    </div>
+  </section>
+
+  <footer class="block foot" id="contact">
+    <a href="tel:12345678901"><span class="bi" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg></span>CALL: 12345678901</a>
+    <a href="mailto:1234@gmail.com"><span class="bi" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>EMAIL: 1234@gmail.com</a>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var serving=0,qid=1,joined=false,MIN=20;
+  var s=document.getElementById("serving"),q=document.getElementById("qid"),e=document.getElementById("eta"),t=document.getElementById("toast"),j=document.getElementById("join");
+  function pad(n){return n<10?"0"+n:""+n}
+  function render(){
+    s.textContent=serving;q.textContent=qid;
+    var m=joined?Math.max(qid-serving,0)*MIN:0;
+    e.textContent=pad(Math.floor(m/60))+":"+pad(m%60);
+  }
+  j.addEventListener("click",function(){
+    if(joined){t.textContent="You’re already in the queue as #"+qid+".";return}
+    joined=true;qid=serving+1;render();
+    t.textContent="You joined the queue. Your ID is #"+qid+".";
+  });
+  document.getElementById("book").addEventListener("click",function(ev){
+    ev.preventDefault();t.textContent="Booking opens here once connected to the schedule.";
+  });
+  var b=document.getElementById("burger"),m=document.getElementById("menu");
+  b.addEventListener("click",function(){
+    var o=m.classList.toggle("open");b.setAttribute("aria-expanded",o);
+  });
+  render();
+})();
+</script>
+</body>
+</html>
