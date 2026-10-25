@@ -1,0 +1,323 @@
+/* ==========================================================
+   TrimQ – style.css
+   Mobile-first layout, black rounded blocks on a plain page.
+   ========================================================== */
+
+/* ---------- 1. Colour tokens (light mode by default) ----------
+   Change colours here and they update across the whole page. */
+:root {
+  --bg: #FFFFFF;        /* page background */
+  --ink: #111111;       /* normal text colour */
+  --block: #0A0A0A;     /* black rounded blocks */
+  --on-block: #FFFFFF;  /* text colour inside the blocks */
+  --gold: #F2C94C;      /* accent colour */
+  --grey: #8A8A8A;      /* icon circles and placeholders */
+  --line: #D9D9D9;      /* thin borders */
+
+  box-sizing: border-box;
+  /* keeps content clear of phone notches and system bars */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---------- 2. Dark mode tokens ----------
+   Used automatically when the visitor's device is in dark mode. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0A0A0A;
+    --ink: #F2F2F2;
+    --block: #1E1E1E;
+    --on-block: #FFFFFF;
+    --gold: #F2C94C;
+    --grey: #9A9A9A;
+    --line: #333333;
+  }
+}
+
+/* Same dark colours, forced on with data-theme="dark" on <html> */
+:root[data-theme="dark"] {
+  --bg: #0A0A0A;
+  --ink: #F2F2F2;
+  --block: #1E1E1E;
+  --on-block: #FFFFFF;
+  --gold: #F2C94C;
+  --grey: #9A9A9A;
+  --line: #333333;
+}
+
+/* ---------- 3. Base / reset ---------- */
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* padding counts inside element widths */
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 1rem/1.5 "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* visible keyboard focus ring */
+:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* ---------- 4. Page container ----------
+   A single narrow column, like a phone screen, centred on desktop. */
+.app {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 1rem 1rem 2rem;
+  display: grid;
+  gap: 1.1rem;
+}
+
+/* Shared look for every black rounded block */
+.block {
+  background: var(--block);
+  color: var(--on-block);
+  border-radius: 20px;
+}
+
+/* ---------- 5. Header (logo + login) ---------- */
+.top {
+  height: 150px;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.top .logo {
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.top .login {
+  position: absolute;
+  top: 0.9rem;
+  right: 1.2rem;
+  color: var(--on-block);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.top .login:hover {
+  text-decoration: underline;
+}
+
+/* ---------- 6. Queue status bar ----------
+   Three columns: Now Serving, Queue ID, Estimated Time. */
+.status {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  padding: 0.9rem 0.8rem;
+  align-items: center;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+/* grey circle icon */
+.stat .dot {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--grey);
+}
+
+/* the number / time value */
+.stat b {
+  display: block;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* gold "Queue ID" label */
+.stat.mid span {
+  color: var(--gold);
+}
+
+/* ---------- 7. Action buttons (Join Queue / Book Appointment) ---------- */
+.action {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: calc(100% - 2.4rem);
+  margin: 0 auto;
+  padding: 0.9rem 1rem;
+  border: 0;
+  cursor: pointer;
+  font: 500 1.15rem "Poppins", sans-serif;
+  text-align: left;
+}
+
+.action:hover {
+  filter: brightness(1.25);
+}
+
+/* round icon on the left */
+.action .ico {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--grey);
+  display: grid;
+  place-items: center;
+  color: #111;
+}
+
+/* button text, centred */
+.action span.lbl {
+  flex: 1;
+  text-align: center;
+}
+
+.action[disabled] {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* ---------- 8. Recommended haircuts: heading + menu button ---------- */
+.rec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.8rem;
+  position: relative;
+}
+
+.rec-head h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/* hamburger (three lines) button */
+.burger {
+  background: none;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 0.3rem;
+}
+
+/* Dropdown menu (hidden until JS adds the .open class) */
+.menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 2;
+  background: var(--block);
+  color: var(--on-block);
+  border-radius: 14px;
+  padding: 0.5rem;
+  min-width: 170px;
+  display: none;
+}
+
+.menu.open {
+  display: block;
+}
+
+.menu a {
+  display: block;
+  padding: 0.5rem 0.8rem;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.menu a:hover {
+  background: #333;
+}
+
+/* ---------- 9. Haircut cards (three columns) ---------- */
+.cuts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  text-align: center;
+  margin: 0.6rem 0 0.4rem;
+}
+
+/* square image placeholder */
+.img {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: var(--block);
+  color: var(--on-block);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* black name tag */
+.cut .name {
+  margin-top: 0.5rem;
+  background: var(--block);
+  color: var(--on-block);
+  border-radius: 8px;
+  padding: 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.cut .price {
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
+}
+
+/* ---------- 10. Footer (call + email) ---------- */
+.foot {
+  padding: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 0.6rem;
+}
+
+.foot a {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  color: var(--on-block);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* grey rounded icon square */
+.foot .bi {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--grey);
+  display: grid;
+  place-items: center;
+  color: #111;
+}
+
+/* ---------- 11. Status message under the buttons ---------- */
+.toast {
+  min-height: 1.4rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--grey);
+}
