@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- Makes the page fit phone screens properly -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Login – TrimQ</title>
+
+  <!-- Poppins font from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shares the same stylesheet as the home page -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <main class="app">
+
+    <!-- ===== HEADER: back link and logo placeholder ===== -->
+    <header class="block top short">
+      <a class="back" href="index.html">&larr; Back</a>
+      <div class="logo">LOGO HERE</div>
+    </header>
+
+    <!-- ===== LOGIN FORM: email, password, and submit button ===== -->
+    <section class="block login-card" aria-labelledby="login-title">
+      <h1 id="login-title">Welcome back</h1>
+
+      <form id="login-form" novalidate>
+
+        <!-- Email field -->
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+
+        <!-- Password field with a Show/Hide button -->
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="password" name="password" placeholder="Your password" autocomplete="current-password" required>
+            <button class="pw-toggle" id="pw-toggle" type="button" aria-controls="password">Show</button>
+          </div>
+        </div>
+
+        <!-- Message area: errors and success appear here -->
+        <div class="form-msg" id="form-msg" role="status"></div>
+
+        <button class="submit" type="submit">LOGIN</button>
+      </form>
+
+      <!-- Extra links under the form -->
+      <div class="helper">
+        <a href="#forgot">Forgot password?</a>
+        <a href="#signup">Create an account</a>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER: contact details (same as the home page) ===== -->
+    <footer class="block foot" id="contact">
+      <a href="tel:12345678901">
+        <span class="bi" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+            <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />
+          </svg>
+        </span>
+        CALL: 12345678901
+      </a>
+
+      <a href="mailto:1234@gmail.com">
+        <span class="bi" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="m3 7 9 6 9-6" />
+          </svg>
+        </span>
+        EMAIL: 1234@gmail.com
+      </a>
+    </footer>
+
+  </main>
+
+  <script>
+    /* ==========================================================
+       Login behaviour (demo only: nothing is sent to a server yet,
+       so no real account check happens)
+       ========================================================== */
+    (function () {
+
+      /* ---- Grab the page elements we need ---- */
+      var form = document.getElementById("login-form");
+      var emailEl = document.getElementById("email");
+      var passEl = document.getElementById("password");
+      var toggle = document.getElementById("pw-toggle");
+      var msg = document.getElementById("form-msg");
+
+      /* ---- SHOW / HIDE button: switches the password between dots and text ---- */
+      toggle.addEventListener("click", function () {
+        var hidden = passEl.type === "password";
+        passEl.type = hidden ? "text" : "password";
+        toggle.textContent = hidden ? "Hide" : "Show";
+      });
+
+      /* ---- FORM SUBMIT: checks the fields before "logging in" ---- */
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+
+        var email = emailEl.value.trim();
+        var password = passEl.value;
+
+        /* Basic email shape check: something@something.something */
+        var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        if (!emailOk) {
+          msg.textContent = "Please enter a valid email address.";
+          emailEl.focus();
+          return;
+        }
+
+        if (password.length < 6) {
+          msg.textContent = "Password must be at least 6 characters.";
+          passEl.focus();
+          return;
+        }
+
+        /* TODO: replace this with a real login request to your backend */
+        msg.textContent = "Login successful (demo). Redirecting…";
+        setTimeout(function () {
+          window.location.href = "index.html";
+        }, 1000);
+      });
+
+    })();
+  </script>
+</body>
+
+</html>

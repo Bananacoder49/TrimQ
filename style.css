@@ -321,3 +321,129 @@ body {
   font-size: 0.9rem;
   color: var(--grey);
 }
+
+/* ==========================================================
+   LOGIN PAGE (login.html)
+   ========================================================== */
+
+/* ---------- 12. Login header: shorter than the home header ---------- */
+.top.short {
+  height: 110px;
+}
+
+/* "Back" link in the top-left corner of the header */
+.top .back {
+  position: absolute;
+  top: 0.9rem;
+  left: 1.2rem;
+  color: var(--on-block);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.top .back:hover {
+  text-decoration: underline;
+}
+
+/* ---------- 13. Login form card ---------- */
+.login-card {
+  padding: 1.4rem 1.2rem 1.6rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.login-card h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* one label + input pair */
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field label {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.field input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #111111;
+  font: 400 1rem "Poppins", sans-serif;
+}
+
+.field input:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+
+/* password input with the Show/Hide button on top of its right edge */
+.pw-wrap {
+  position: relative;
+}
+
+.pw-wrap input {
+  padding-right: 4.5rem;
+}
+
+.pw-toggle {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: 0;
+  color: #444444;
+  font: 500 0.8rem "Poppins", sans-serif;
+  cursor: pointer;
+  padding: 0.4rem;
+}
+
+/* ---------- 14. Submit button and helper links ---------- */
+.submit {
+  border: 0;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #111111;
+  font: 600 1.05rem "Poppins", sans-serif;
+  padding: 0.85rem;
+  cursor: pointer;
+}
+
+.submit:hover {
+  filter: brightness(1.08);
+}
+
+.helper {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.helper a {
+  color: var(--on-block);
+}
+
+/* error / success message inside the card */
+.form-msg {
+  min-height: 1.3rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--gold);
+}
+
+/* spacing between the form's fields, message and button */
+.login-card form {
+  display: grid;
+  gap: 1rem;
+}
