@@ -447,3 +447,93 @@ body {
   display: grid;
   gap: 1rem;
 }
+
+/* ==========================================================
+   QUEUE PAGE (queue.html)
+   ========================================================== */
+
+/* ---------- 15. Join form (shown before the visitor has a ticket) ---------- */
+.queue-card {
+  padding: 1.4rem 1.2rem 1.6rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.queue-card h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.queue-card form {
+  display: grid;
+  gap: 1rem;
+}
+
+/* dropdown uses the same look as the text inputs */
+.field select {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: #111111;
+  font: 400 1rem "Poppins", sans-serif;
+}
+
+.field select:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ---------- 16. Ticket (shown after joining) ---------- */
+.ticket {
+  text-align: center;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.ticket .label {
+  font-size: 0.85rem;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* the big queue number */
+.ticket .big {
+  font-size: 4.5rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.ticket .details {
+  font-size: 0.95rem;
+}
+
+/* position in line, e.g. "3 people ahead of you" */
+.ticket .ahead {
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+/* "Leave queue" button */
+.leave {
+  justify-self: center;
+  background: none;
+  border: 2px solid var(--on-block);
+  color: var(--on-block);
+  border-radius: 999px;
+  padding: 0.6rem 1.4rem;
+  font: 500 0.95rem "Poppins", sans-serif;
+  cursor: pointer;
+}
+
+.leave:hover {
+  background: #333333;
+}

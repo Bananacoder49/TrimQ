@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- Makes the page fit phone screens properly -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Join Queue – TrimQ</title>
+
+  <!-- Poppins font from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shares the same stylesheet as the other pages -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <main class="app">
+
+    <!-- ===== HEADER: back link and logo placeholder ===== -->
+    <header class="block top short">
+      <a class="back" href="index.html">&larr; Back</a>
+      <div class="logo">LOGO HERE</div>
+    </header>
+
+    <!-- ===== QUEUE STATUS BAR: same layout as the home page, updated by the script ===== -->
+    <section class="block status" aria-label="Queue status" aria-live="polite">
+      <div class="stat">
+        <span class="dot" aria-hidden="true"></span>
+        <div>Now Serving<b id="serving">0</b></div>
+      </div>
+
+      <div class="stat mid">
+        <span class="dot" aria-hidden="true"></span>
+        <div><span>Queue ID</span><b id="qid" style="color: var(--on-block)">–</b></div>
+      </div>
+
+      <div class="stat">
+        <span class="dot" aria-hidden="true"></span>
+        <div>Estimated Time<b id="eta">00:00</b></div>
+      </div>
+    </section>
+
+    <!-- ===== JOIN FORM: shown until the visitor has a ticket ===== -->
+    <section class="block queue-card" id="join-card" aria-labelledby="join-title">
+      <h1 id="join-title">Join the queue</h1>
+
+      <form id="join-form" novalidate>
+
+        <!-- Name field -->
+        <div class="field">
+          <label for="name">Your name</label>
+          <input type="text" id="name" name="name" placeholder="e.g. Marco" autocomplete="given-name" required>
+        </div>
+
+        <!-- Service dropdown (same haircuts and prices as the home page) -->
+        <div class="field">
+          <label for="service">Haircut</label>
+          <select id="service" name="service">
+            <option>Haircut 1 – $10</option>
+            <option>Haircut 2 – $15</option>
+            <option>Haircut 3 – $25</option>
+          </select>
+        </div>
+
+        <!-- Message area: errors appear here -->
+        <div class="form-msg" id="form-msg" role="status"></div>
+
+        <button class="submit" type="submit">JOIN QUEUE</button>
+      </form>
+    </section>
+
+    <!-- ===== TICKET: shown after joining (hidden until then) ===== -->
+    <section class="block queue-card hidden" id="ticket-card" aria-labelledby="ticket-title">
+      <div class="ticket">
+        <h1 id="ticket-title">You’re in the queue</h1>
+        <div class="label">Your queue number</div>
+        <div class="big" id="ticket-id">1</div>
+        <div class="details" id="ticket-details"></div>
+        <div class="ahead" id="ticket-ahead"></div>
+        <button class="leave" id="leave" type="button">Leave queue</button>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER: contact details (same as the home page) ===== -->
+    <footer class="block foot" id="contact">
+      <a href="tel:12345678901">
+        <span class="bi" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+            <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />
+          </svg>
+        </span>
+        CALL: 12345678901
+      </a>
+
+      <a href="mailto:1234@gmail.com">
+        <span class="bi" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="m3 7 9 6 9-6" />
+          </svg>
+        </span>
+        EMAIL: 1234@gmail.com
+      </a>
+    </footer>
+
+  </main>
+
+  <script>
+    /* ==========================================================
+       Queue behaviour (demo only: the queue is simulated in the
+       browser, so it is not shared between visitors yet)
+       ========================================================== */
+    (function () {
+
+      /* ---- Demo settings ---- */
+      var MIN = 20;          // assumed minutes per customer
+      var WAITING = 3;       // people already in line when you join
+      var TICK_MS = 10000;   // demo: "Now Serving" moves forward every 10 seconds
+
+      /* ---- Queue state ---- */
+      var serving = 0;       // number currently being served
+      var ticket = null;     // the visitor's ticket: { id, name, service }
+
+      /* ---- Grab the page elements we need ---- */
+      var servingEl = document.getElementById("serving");
+      var qidEl = document.getElementById("qid");
+      var etaEl = document.getElementById("eta");
+      var joinCard = document.getElementById("join-card");
+      var ticketCard = document.getElementById("ticket-card");
+      var form = document.getElementById("join-form");
+      var nameEl = document.getElementById("name");
+      var serviceEl = document.getElementById("service");
+      var msg = document.getElementById("form-msg");
+      var idEl = document.getElementById("ticket-id");
+      var detailsEl = document.getElementById("ticket-details");
+      var aheadEl = document.getElementById("ticket-ahead");
+      var leaveBtn = document.getElementById("leave");
+
+      /* ---- Saving the ticket in the browser so a refresh keeps your place ---- */
+      function save() {
+        try {
+          if (ticket) {
+            localStorage.setItem("trimq-ticket", JSON.stringify(ticket));
+          } else {
+            localStorage.removeItem("trimq-ticket");
+          }
+        } catch (err) { /* storage unavailable: the demo still works */ }
+      }
+
+      function load() {
+        try {
+          var saved = localStorage.getItem("trimq-ticket");
+          if (saved) {
+            ticket = JSON.parse(saved);
+            serving = Math.max(ticket.id - WAITING - 1, 0); // restart the demo from a sensible point
+          }
+        } catch (err) { ticket = null; }
+      }
+
+      /* Adds a leading zero, e.g. 5 -> "05" */
+      function pad(n) {
+        return n < 10 ? "0" + n : "" + n;
+      }
+
+      /* Redraws the status bar and the ticket */
+      function render() {
+        servingEl.textContent = serving;
+
+        /* Not in the queue yet: show the join form */
+        if (!ticket) {
+          qidEl.textContent = "–";
+          etaEl.textContent = "00:00";
+          joinCard.classList.remove("hidden");
+          ticketCard.classList.add("hidden");
+          return;
+        }
+
+        /* In the queue: show the ticket */
+        var ahead = Math.max(ticket.id - serving - 1, 0);
+        var minutes = ahead * MIN;
+
+        qidEl.textContent = ticket.id;
+        etaEl.textContent = pad(Math.floor(minutes / 60)) + ":" + pad(minutes % 60);
+
+        idEl.textContent = ticket.id;
+        detailsEl.textContent = ticket.name + " · " + ticket.service;
+
+        if (serving >= ticket.id) {
+          aheadEl.textContent = "It’s your turn! Head to the chair.";
+        } else if (ahead === 0) {
+          aheadEl.textContent = "You’re next!";
+        } else {
+          aheadEl.textContent = ahead + (ahead === 1 ? " person" : " people") + " ahead of you";
+        }
+
+        joinCard.classList.add("hidden");
+        ticketCard.classList.remove("hidden");
+      }
+
+      /* ---- JOIN FORM: checks the name, then creates the ticket ---- */
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+
+        var name = nameEl.value.trim();
+        if (!name) {
+          msg.textContent = "Please enter your name.";
+          nameEl.focus();
+          return;
+        }
+
+        msg.textContent = "";
+        serving = 0;
+        ticket = {
+          id: serving + WAITING + 1,
+          name: name,
+          service: serviceEl.value
+        };
+        save();
+        render();
+      });
+
+      /* ---- LEAVE QUEUE button: removes the ticket and shows the form again ---- */
+      leaveBtn.addEventListener("click", function () {
+        ticket = null;
+        serving = 0;
+        save();
+        render();
+      });
+
+      /* ---- DEMO TIMER: moves "Now Serving" forward until it is your turn ---- */
+      setInterval(function () {
+        if (ticket && serving < ticket.id) {
+          serving++;
+          render();
+        }
+      }, TICK_MS);
+
+      /* Restore a saved ticket (if any) and draw the page once on load */
+      load();
+      render();
+
+    })();
+  </script>
+</body>
+
+</html>

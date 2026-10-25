@@ -45,8 +45,8 @@
       </div>
     </section>
 
-    <!-- ===== JOIN QUEUE BUTTON: adds the visitor to the live queue (see script) ===== -->
-    <button class="block action" id="join" type="button">
+    <!-- ===== JOIN QUEUE BUTTON: opens the queue page ===== -->
+    <a class="block action" id="join" href="queue.html" style="text-decoration: none">
       <span class="ico" aria-hidden="true">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <circle cx="9" cy="8" r="3.5" />
@@ -55,7 +55,7 @@
         </svg>
       </span>
       <span class="lbl">JOIN QUEUE</span>
-    </button>
+    </a>
 
     <!-- ===== BOOK APPOINTMENT BUTTON: placeholder, link it to the booking page later ===== -->
     <a class="block action" id="book" href="#book" style="text-decoration: none">
@@ -154,7 +154,6 @@
       var qidEl = document.getElementById("qid");
       var etaEl = document.getElementById("eta");
       var toastEl = document.getElementById("toast");
-      var joinBtn = document.getElementById("join");
 
       /* Adds a leading zero, e.g. 5 -> "05" */
       function pad(n) {
@@ -169,19 +168,6 @@
         var minutes = joined ? Math.max(qid - serving, 0) * MIN : 0;
         etaEl.textContent = pad(Math.floor(minutes / 60)) + ":" + pad(minutes % 60);
       }
-
-      /* ---- JOIN QUEUE button: gives the visitor a queue number ---- */
-      joinBtn.addEventListener("click", function () {
-        if (joined) {
-          toastEl.textContent = "You’re already in the queue as #" + qid + ".";
-          return;
-        }
-
-        joined = true;
-        qid = serving + 1;
-        render();
-        toastEl.textContent = "You joined the queue. Your ID is #" + qid + ".";
-      });
 
       /* ---- BOOK APPOINTMENT button: placeholder message until booking is built ---- */
       document.getElementById("book").addEventListener("click", function (ev) {
