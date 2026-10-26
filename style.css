@@ -537,3 +537,157 @@ body {
 .leave:hover {
   background: #333333;
 }
+
+/* ==========================================================
+   BOOKING PAGE (book.html)
+   ========================================================== */
+
+/* ---------- 17. Booking cards (calendar, times, details, confirmation) ---------- */
+.book-card {
+  padding: 1.4rem 1.2rem 1.6rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.book-card h1,
+.book-card h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.book-card form {
+  display: grid;
+  gap: 1rem;
+}
+
+/* ---------- 18. Calendar ---------- */
+
+/* month title with previous / next buttons */
+.cal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cal-title {
+  font-weight: 500;
+}
+
+.cal-nav {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--on-block);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.cal-nav:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.cal-nav[disabled] {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* 7 columns: one per weekday */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.3rem;
+  text-align: center;
+}
+
+/* weekday labels (Su, Mo, ...) */
+.dow {
+  font-size: 0.72rem;
+  color: var(--gold);
+  padding-bottom: 0.2rem;
+}
+
+/* one day of the month */
+.day {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--on-block);
+  font: 500 0.9rem "Poppins", sans-serif;
+  cursor: pointer;
+}
+
+.day:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* today gets a gold ring */
+.day.today {
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+/* the chosen day */
+.day.selected {
+  background: var(--gold);
+  color: #111111;
+}
+
+/* past days and closed days */
+.day[disabled] {
+  opacity: 0.25;
+  cursor: default;
+}
+
+/* ---------- 19. Time slots ---------- */
+.slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.slot {
+  padding: 0.6rem 0.2rem;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--on-block);
+  font: 500 0.85rem "Poppins", sans-serif;
+  cursor: pointer;
+}
+
+.slot:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.slot.selected {
+  background: var(--gold);
+  color: #111111;
+}
+
+/* times that are already taken */
+.slot[disabled] {
+  opacity: 0.25;
+  text-decoration: line-through;
+  cursor: default;
+}
+
+/* ---------- 20. Summary line and confirmation ---------- */
+.summary {
+  text-align: center;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.done {
+  text-align: center;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.done .big {
+  font-size: 1.6rem;
+  font-weight: 600;
+}

@@ -57,8 +57,8 @@
       <span class="lbl">JOIN QUEUE</span>
     </a>
 
-    <!-- ===== BOOK APPOINTMENT BUTTON: placeholder, link it to the booking page later ===== -->
-    <a class="block action" id="book" href="#book" style="text-decoration: none">
+    <!-- ===== BOOK APPOINTMENT BUTTON: opens the booking page ===== -->
+    <a class="block action" id="book" href="book.html" style="text-decoration: none">
       <span class="ico" aria-hidden="true">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
@@ -67,9 +67,6 @@
       </span>
       <span class="lbl">BOOK APPOINTMENT</span>
     </a>
-
-    <!-- ===== MESSAGE AREA: the script writes feedback here ===== -->
-    <div class="toast" id="toast" role="status"></div>
 
     <!-- ===== RECOMMENDED HAIRCUTS: heading, menu button, and three cards ===== -->
     <section aria-labelledby="rec">
@@ -86,7 +83,7 @@
         <!-- Dropdown menu (hidden until the hamburger button is clicked) -->
         <nav class="menu" id="menu" aria-label="Menu">
           <a href="login.html">Login</a>
-          <a href="#book">Book appointment</a>
+          <a href="book.html">Book appointment</a>
           <a href="#contact">Contact</a>
         </nav>
       </div>
@@ -153,7 +150,6 @@
       var servingEl = document.getElementById("serving");
       var qidEl = document.getElementById("qid");
       var etaEl = document.getElementById("eta");
-      var toastEl = document.getElementById("toast");
 
       /* Adds a leading zero, e.g. 5 -> "05" */
       function pad(n) {
@@ -168,12 +164,6 @@
         var minutes = joined ? Math.max(qid - serving, 0) * MIN : 0;
         etaEl.textContent = pad(Math.floor(minutes / 60)) + ":" + pad(minutes % 60);
       }
-
-      /* ---- BOOK APPOINTMENT button: placeholder message until booking is built ---- */
-      document.getElementById("book").addEventListener("click", function (ev) {
-        ev.preventDefault();
-        toastEl.textContent = "Booking opens here once connected to the schedule.";
-      });
 
       /* ---- HAMBURGER button: shows or hides the dropdown menu ---- */
       var burger = document.getElementById("burger");

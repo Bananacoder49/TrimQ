@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- Makes the page fit phone screens properly -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Book Appointment – TrimQ</title>
+
+  <!-- Poppins font from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Shares the same stylesheet as the other pages -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <main class="app">
+
+    <!-- ===== HEADER: back link and logo placeholder ===== -->
+    <header class="block top short">
+      <a class="back" href="index.html">&larr; Back</a>
+      <div class="logo">LOGO HERE</div>
+    </header>
+
+    <!-- ===== STEP 1: CALENDAR (pick a date) ===== -->
+    <section class="block book-card" id="cal-card" aria-labelledby="cal-heading">
+      <h1 id="cal-heading">1. Pick a date</h1>
+
+      <!-- Month title with previous / next buttons -->
+      <div class="cal-head">
+        <button class="cal-nav" id="prev" type="button" aria-label="Previous month">&lsaquo;</button>
+        <div class="cal-title" id="cal-title" aria-live="polite"></div>
+        <button class="cal-nav" id="next" type="button" aria-label="Next month">&rsaquo;</button>
+      </div>
+
+      <!-- The days are drawn here by the script -->
+      <div class="cal-grid" id="cal-grid"></div>
+    </section>
+
+    <!-- ===== STEP 2: TIME SLOTS (shown after a date is picked) ===== -->
+    <section class="block book-card hidden" id="slots-card" aria-labelledby="slots-heading">
+      <h2 id="slots-heading">2. Pick a time</h2>
+      <div class="slots" id="slots"></div>
+    </section>
+
+    <!-- ===== STEP 3: DETAILS (shown after a time is picked) ===== -->
+    <section class="block book-card hidden" id="details-card" aria-labelledby="details-heading">
+      <h2 id="details-heading">3. Your details</h2>
+
+      <form id="book-form" novalidate>
+
+        <!-- Shows the chosen date and time -->
+        <div class="summary" id="summary"></div>
+
+        <!-- Name field -->
+        <div class="field">
+          <label for="name">Your name</label>
+          <input type="text" id="name" name="name" placeholder="e.g. Marco" autocomplete="given-name" required>
+        </div>
+
+        <!-- Haircut dropdown (same haircuts and prices as the home page) -->
+        <div class="field">
+          <label for="service">Haircut</label>
+          <select id="service" name="service">
+            <option>Haircut 1 – $10</option>
+            <option>Haircut 2 – $15</option>
+            <option>Haircut 3 – $25</option>
+          </select>
+        </div>
+
+        <!-- Message area: errors appear here -->
+        <div class="form-msg" id="form-msg" role="status"></div>
+
+        <button class="submit" type="submit">CONFIRM BOOKING</button>
+      </form>
+    </section>
+
+    <!-- ===== CONFIRMATION (shown after booking) ===== -->
+    <section class="block book-card hidden" id="done-card" aria-labelledby="done-heading">
+      <div class="done">
+        <h1 id="done-heading">Booking confirmed</h1>
+        <div class="big" id="done-when"></div>
+        <div id="done-who"></div>
+        <button class="leave" id="again" type="button">Book another</button>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER: contact details (same as the home page) ===== -->
+    <footer class="block foot" id="contact">
+      <a href="tel:12345678901">
+        <span class="bi" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+            <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />
+          </svg>
+        </span>
+        CALL: 12345678901
+      </a>
+
+      <a href="mailto:1234@gmail.com">
+        <span class="bi" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="m3 7 9 6 9-6" />
+          </svg>
+        </span>
+        EMAIL: 1234@gmail.com
+      </a>
+    </footer>
+
+  </main>
+
+  <script>
+    /* ==========================================================
+       Booking behaviour (demo only: bookings are saved in this
+       browser, not on a server, so other visitors can't see them)
+       ========================================================== */
+    (function () {
+
+      /* ---- Settings you can change ---- */
+      var OPEN = 9 * 60;           // opening time in minutes after midnight (9:00 AM)
+      var CLOSE = 18 * 60;         // closing time (6:00 PM)
+      var SLOT = 30;               // minutes per appointment slot
+      var CLOSED_DAYS = [0];       // days the shop is closed: 0 = Sunday, 1 = Monday ... 6 = Saturday
+      var MAX_MONTHS_AHEAD = 2;    // how many months ahead people can book
+
+      /* ---- State ---- */
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      var viewYear = today.getFullYear();   // month currently shown in the calendar
+      var viewMonth = today.getMonth();
+      var selectedISO = null;               // chosen date, e.g. "2026-11-03"
+      var selectedTime = null;              // chosen time in minutes after midnight
+
+      /* ---- Grab the page elements we need ---- */
+      var titleEl = document.getElementById("cal-title");
+      var gridEl = document.getElementById("cal-grid");
+      var prevBtn = document.getElementById("prev");
+      var nextBtn = document.getElementById("next");
+      var slotsEl = document.getElementById("slots");
+      var calCard = document.getElementById("cal-card");
+      var slotsCard = document.getElementById("slots-card");
+      var detailsCard = document.getElementById("details-card");
+      var doneCard = document.getElementById("done-card");
+      var summaryEl = document.getElementById("summary");
+      var form = document.getElementById("book-form");
+      var nameEl = document.getElementById("name");
+      var serviceEl = document.getElementById("service");
+      var msg = document.getElementById("form-msg");
+      var doneWhen = document.getElementById("done-when");
+      var doneWho = document.getElementById("done-who");
+      var againBtn = document.getElementById("again");
+
+      /* ---- Helpers ---- */
+
+      /* Adds a leading zero, e.g. 5 -> "05" */
+      function pad(n) {
+        return n < 10 ? "0" + n : "" + n;
+      }
+
+      /* Turns a year, month and day into "2026-11-03" */
+      function toISO(y, m, d) {
+        return y + "-" + pad(m + 1) + "-" + pad(d);
+      }
+
+      /* Turns minutes after midnight into "9:30 AM" */
+      function timeLabel(mins) {
+        var h = Math.floor(mins / 60);
+        var m = mins % 60;
+        var suffix = h >= 12 ? "PM" : "AM";
+        var h12 = h % 12 === 0 ? 12 : h % 12;
+        return h12 + ":" + pad(m) + " " + suffix;
+      }
+
+      /* Turns "2026-11-03" into a readable date, e.g. "Tuesday, November 3" */
+      function dateLabel(iso) {
+        var p = iso.split("-");
+        var d = new Date(+p[0], +p[1] - 1, +p[2]);
+        return d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+      }
+
+      /* ---- Saved bookings (kept in the browser) ---- */
+      function loadBookings() {
+        try {
+          return JSON.parse(localStorage.getItem("trimq-bookings")) || [];
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function saveBooking(b) {
+        try {
+          var all = loadBookings();
+          all.push(b);
+          localStorage.setItem("trimq-bookings", JSON.stringify(all));
+        } catch (err) { /* storage unavailable: the demo still works */ }
+      }
+
+      /* Is this slot already taken? Some slots are marked taken automatically
+         so the demo looks realistic; replace this with real data later. */
+      function isTaken(iso, mins) {
+        var seed = 0;
+        var key = iso + mins;
+        for (var i = 0; i < key.length; i++) {
+          seed += key.charCodeAt(i) * (i + 1);
+        }
+        if (seed % 5 === 0) {
+          return true;
+        }
+        return loadBookings().some(function (b) {
+          return b.date === iso && b.time === mins;
+        });
+      }
+
+      /* ---- Calendar ---- */
+      function renderCalendar() {
+        titleEl.textContent = new Date(viewYear, viewMonth, 1)
+          .toLocaleDateString(undefined, { month: "long", year: "numeric" });
+
+        /* Disable the arrows at the edges of the allowed range */
+        var monthsAhead = (viewYear - today.getFullYear()) * 12 + (viewMonth - today.getMonth());
+        prevBtn.disabled = monthsAhead <= 0;
+        nextBtn.disabled = monthsAhead >= MAX_MONTHS_AHEAD;
+
+        gridEl.innerHTML = "";
+
+        /* Weekday labels */
+        ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].forEach(function (label) {
+          var el = document.createElement("div");
+          el.className = "dow";
+          el.textContent = label;
+          gridEl.appendChild(el);
+        });
+
+        /* Empty cells before the 1st of the month */
+        var firstDay = new Date(viewYear, viewMonth, 1).getDay();
+        for (var i = 0; i < firstDay; i++) {
+          gridEl.appendChild(document.createElement("span"));
+        }
+
+        /* One button per day */
+        var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+        for (var d = 1; d <= daysInMonth; d++) {
+          var date = new Date(viewYear, viewMonth, d);
+          var iso = toISO(viewYear, viewMonth, d);
+          var btn = document.createElement("button");
+
+          btn.type = "button";
+          btn.className = "day";
+          btn.textContent = d;
+          btn.setAttribute("aria-label", dateLabel(iso));
+          btn.dataset.iso = iso;
+
+          if (date.getTime() === today.getTime()) {
+            btn.classList.add("today");
+          }
+          if (iso === selectedISO) {
+            btn.classList.add("selected");
+            btn.setAttribute("aria-pressed", "true");
+          }
+          /* Past days and closed days can't be picked */
+          if (date < today || CLOSED_DAYS.indexOf(date.getDay()) !== -1) {
+            btn.disabled = true;
+          }
+
+          gridEl.appendChild(btn);
+        }
+      }
+
+      /* Clicking a day (one listener for the whole grid) */
+      gridEl.addEventListener("click", function (ev) {
+        var btn = ev.target.closest(".day");
+        if (!btn || btn.disabled) {
+          return;
+        }
+        selectedISO = btn.dataset.iso;
+        selectedTime = null;
+        detailsCard.classList.add("hidden");
+        slotsCard.classList.remove("hidden");
+        renderCalendar();
+        renderSlots();
+        slotsCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+
+      /* Previous / next month buttons */
+      prevBtn.addEventListener("click", function () {
+        viewMonth--;
+        if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+        renderCalendar();
+      });
+
+      nextBtn.addEventListener("click", function () {
+        viewMonth++;
+        if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+        renderCalendar();
+      });
+
+      /* ---- Time slots ---- */
+      function renderSlots() {
+        slotsEl.innerHTML = "";
+
+        /* If today is picked, times that already passed can't be booked */
+        var now = new Date();
+        var isToday = selectedISO === toISO(now.getFullYear(), now.getMonth(), now.getDate());
+        var nowMins = now.getHours() * 60 + now.getMinutes();
+
+        for (var t = OPEN; t < CLOSE; t += SLOT) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "slot";
+          btn.textContent = timeLabel(t);
+          btn.dataset.time = t;
+
+          if (t === selectedTime) {
+            btn.classList.add("selected");
+            btn.setAttribute("aria-pressed", "true");
+          }
+          if (isTaken(selectedISO, t) || (isToday && t <= nowMins)) {
+            btn.disabled = true;
+          }
+
+          slotsEl.appendChild(btn);
+        }
+      }
+
+      /* Clicking a time slot */
+      slotsEl.addEventListener("click", function (ev) {
+        var btn = ev.target.closest(".slot");
+        if (!btn || btn.disabled) {
+          return;
+        }
+        selectedTime = +btn.dataset.time;
+        summaryEl.textContent = dateLabel(selectedISO) + " at " + timeLabel(selectedTime);
+        detailsCard.classList.remove("hidden");
+        renderSlots();
+        detailsCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+
+      /* ---- Confirm booking ---- */
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+
+        var name = nameEl.value.trim();
+        if (!name) {
+          msg.textContent = "Please enter your name.";
+          nameEl.focus();
+          return;
+        }
+        if (!selectedISO || selectedTime === null) {
+          msg.textContent = "Please pick a date and a time.";
+          return;
+        }
+
+        msg.textContent = "";
+        saveBooking({ date: selectedISO, time: selectedTime, name: name, service: serviceEl.value });
+
+        doneWhen.textContent = dateLabel(selectedISO) + " at " + timeLabel(selectedTime);
+        doneWho.textContent = name + " · " + serviceEl.value;
+
+        calCard.classList.add("hidden");
+        slotsCard.classList.add("hidden");
+        detailsCard.classList.add("hidden");
+        doneCard.classList.remove("hidden");
+      });
+
+      /* ---- "Book another" button: resets everything ---- */
+      againBtn.addEventListener("click", function () {
+        selectedISO = null;
+        selectedTime = null;
+        form.reset();
+        doneCard.classList.add("hidden");
+        calCard.classList.remove("hidden");
+        renderCalendar();
+      });
+
+      /* Draw the calendar once when the page loads */
+      renderCalendar();
+
+    })();
+  </script>
+</body>
+
+</html>
