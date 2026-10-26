@@ -175,6 +175,11 @@
         return h12 + ":" + pad(m) + " " + suffix;
       }
 
+      /* Turns a start time into a one-hour range, e.g. "8:00 AM – 9:00 AM" */
+      function rangeLabel(start) {
+        return timeLabel(start) + " – " + timeLabel(start + SLOT);
+      }
+
       /* Turns "2026-11-03" into a readable date, e.g. "Tuesday, November 3" */
       function dateLabel(iso) {
         var p = iso.split("-");
@@ -311,7 +316,7 @@
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "slot";
-          btn.textContent = timeLabel(t);
+          btn.textContent = rangeLabel(t);
           btn.dataset.time = t;
 
           if (t === selectedTime) {
@@ -333,7 +338,7 @@
           return;
         }
         selectedTime = +btn.dataset.time;
-        summaryEl.textContent = dateLabel(selectedISO) + " at " + timeLabel(selectedTime);
+        summaryEl.textContent = dateLabel(selectedISO) + ", " + rangeLabel(selectedTime);
         detailsCard.classList.remove("hidden");
         renderSlots();
         detailsCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -357,7 +362,7 @@
         msg.textContent = "";
         saveBooking({ date: selectedISO, time: selectedTime, name: name, service: serviceEl.value });
 
-        doneWhen.textContent = dateLabel(selectedISO) + " at " + timeLabel(selectedTime);
+        doneWhen.textContent = dateLabel(selectedISO) + ", " + rangeLabel(selectedTime);
         doneWho.textContent = name + " · " + serviceEl.value;
 
         calCard.classList.add("hidden");
