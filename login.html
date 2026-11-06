@@ -55,7 +55,7 @@
       <!-- Extra links under the form -->
       <div class="helper">
         <a href="#forgot">Forgot password?</a>
-        <a href="#signup">Create an account</a>
+        <a href="signup.html">Create an account</a>
       </div>
     </section>
 
@@ -83,12 +83,19 @@
 
   </main>
 
+  <!-- Backend address (see config.js). Leave it empty to run in demo mode. -->
+  <script src="config.js"></script>
+
   <script>
     /* ==========================================================
-       Login behaviour (demo only: nothing is sent to a server yet,
-       so no real account check happens)
+       Login behaviour
+       Demo mode (no server address in config.js): only checks the
+       fields. Database mode: checks the account on the server.
        ========================================================== */
     (function () {
+
+      /* ---- Server address from config.js (empty = demo mode) ---- */
+      var API = (window.TRIMQ_API || "").replace(/\/$/, "");
 
       /* ---- Grab the page elements we need ---- */
       var form = document.getElementById("login-form");
@@ -104,7 +111,14 @@
         toggle.textContent = hidden ? "Hide" : "Show";
       });
 
-      /* ---- FORM SUBMIT: checks the fields before "logging in" ---- */
+      /* Goes back to the home page after a short pause */
+      function goHome() {
+        setTimeout(function () {
+          window.location.href = "index.html";
+        }, 1000);
+      }
+
+      /* ---- FORM SUBMIT: checks the fields, then logs in ---- */
       form.addEventListener("submit", function (ev) {
         ev.preventDefault();
 
@@ -112,25 +126,58 @@
         var password = passEl.value;
 
         /* Basic email shape check: something@something.something */
-        var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-        if (!emailOk) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
           msg.textContent = "Please enter a valid email address.";
           emailEl.focus();
           return;
         }
 
-        if (password.length < 6) {
-          msg.textContent = "Password must be at least 6 characters.";
+        if (!password) {
+          msg.textContent = "Please enter your password.";
           passEl.focus();
           return;
         }
 
-        /* TODO: replace this with a real login request to your backend */
-        msg.textContent = "Login successful (demo). Redirecting…";
-        setTimeout(function () {
-          window.location.href = "index.html";
-        }, 1000);
+        /* Demo mode: nothing is checked against an account */
+        if (!API) {
+          msg.textContent = "Login successful (demo). Redirecting…";
+          goHome();
+          return;
+        }
+
+        /* Database mode: ask the server to check the account */
+        var submitBtn = form.querySelector(".submit");
+        submitBtn.disabled = true;
+        msg.textContent = "";
+
+        fetch(API + "/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, password: password })
+        })
+          .then(function (r) {
+            return r.json().then(function (data) {
+              return { ok: r.ok, data: data };
+            });
+          })
+          .then(function (res) {
+            if (!res.ok) {
+              msg.textContent = res.data.error || "Login failed.";
+              return;
+            }
+            /* Remember who is logged in (name and role only, never the password) */
+            try {
+              localStorage.setItem("trimq-user", JSON.stringify(res.data));
+            } catch (err) { /* storage unavailable: login still worked */ }
+            msg.textContent = "Welcome, " + res.data.username + "! Redirecting…";
+            goHome();
+          })
+          .catch(function () {
+            msg.textContent = "Could not reach the server. Please try again.";
+          })
+          .then(function () {
+            submitBtn.disabled = false;
+          });
       });
 
     })();
